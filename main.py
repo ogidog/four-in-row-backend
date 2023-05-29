@@ -21,7 +21,7 @@ def set_field(player_id: int, col: int, game_field: ndarray):
     game_field[row, col] = player_id
 
 
-def check_win(moves):
+def check_win1(moves):
     score = 0
     game_field = np.zeros((ROWS_NUM, COLS_NUM))
     result = {"terminal_node": False, "score": None, "player_id": None}
@@ -41,44 +41,44 @@ def check_win(moves):
     for col in range(COLS_NUM):
         for row in range(3):
             if np.count_nonzero(game_field[row:row + 4, col] == player_id) == 4:
-                score += 100
+                score += 22
             if np.count_nonzero(game_field[row:row + 4, col] == player_id) == 3:
-                score += 7
-            if np.count_nonzero(game_field[row:row + 4, col] == player_id) == 2:
                 score += 2
+            if np.count_nonzero(game_field[row:row + 4, col] == player_id) == 2:
+                score += 1
 
     for row in range(ROWS_NUM):
         for col in range(4):
             if np.count_nonzero(game_field[row, col:col + 4] == player_id) == 4:
-                score += 100
+                score += 22
             if np.count_nonzero(game_field[row, col:col + 4] == player_id) == 3:
-                score += 7
+                score += 2
             if np.count_nonzero(game_field[row, col:col + 4] == player_id) == 2:
-                score += 2
+                score += 1
 
     for i in range(3):
         for j in range(4):
-            positive_diagonal = np.array(
+            diagonal = np.array(
                 [game_field[5 - i, j], game_field[4 - i, j + 1], game_field[3 - i, j + 2], game_field[2 - i, j + 3]])
-            if np.count_nonzero(positive_diagonal == player_id) == 4:
-                score += 100
-            if np.count_nonzero(positive_diagonal == player_id) == 3:
-                score += 7
-            if np.count_nonzero(positive_diagonal == player_id) == 2:
+            if np.count_nonzero(diagonal == player_id) == 4:
+                score += 22
+            if np.count_nonzero(diagonal == player_id) == 3:
                 score += 2
+            if np.count_nonzero(diagonal == player_id) == 2:
+                score += 1
 
     for i in range(3):
         for j in range(4):
-            positive_diagonal = np.array(
+            diagonal = np.array(
                 [game_field[i, j], game_field[i + 1, j + 1], game_field[i + 2, j + 2], game_field[i + 3, j + 3]])
-            if np.count_nonzero(positive_diagonal == player_id) == 4:
-                score += 100
-            if np.count_nonzero(positive_diagonal == player_id) == 3:
-                score += 7
-            if np.count_nonzero(positive_diagonal == player_id) == 2:
+            if np.count_nonzero(diagonal == player_id) == 4:
+                score += 22
+            if np.count_nonzero(diagonal == player_id) == 3:
                 score += 2
+            if np.count_nonzero(diagonal == player_id) == 2:
+                score += 1
 
-        if score >= 100:
+        if score >= 22:
             result["terminal_node"] = True
 
         score = score - player_moves
@@ -90,7 +90,7 @@ def check_win(moves):
         return result
 
 
-def get_optimal_move(current_moves, ):
+def get_optimal_move1(current_moves, ):
     all_moves = copy.deepcopy(current_moves)
     all_scores = [0]
     is_terminal_node = False
@@ -118,6 +118,15 @@ def get_optimal_move(current_moves, ):
     optimal_move = ''
 
     for depth in range(tree_depth, 0, -1):
+        if depth == 1:
+            if (is_max):
+                optimal_column = np.argmax(terminal_scores)
+                optimal_move = terminal_moves[optimal_column]
+            else:
+                optimal_column = np.argmin(terminal_scores)
+                optimal_move = terminal_moves[optimal_column]
+            break
+
         maxmin_scores = []
         maxmin_moves = []
 
@@ -136,19 +145,113 @@ def get_optimal_move(current_moves, ):
         terminal_moves = copy.deepcopy(maxmin_moves)
         is_max = not is_max
 
-        if depth == 2:
-            optimal_column = np.argmax(terminal_scores)
-            optimal_move = terminal_moves[optimal_column]
-            break
-
     return optimal_column, optimal_move
 
 
-# print(check_win(moves='001212233344', game_field=game_field))
+def check_move_availability(moves_values, game_field):
+    null_fields = np.argwhere(moves_values == 0)
+
+
+def check_win(moves):
+    score = 0
+    result = {"terminal_node": False, "score": None, "player_id": None}
+    game_field = np.zeros((ROWS_NUM, COLS_NUM))
+
+    for i in range(len(moves)):
+        if i % 2 == 0:
+            player_id = 1
+            player_moves = int(len(moves) / 2) + 1
+        else:
+            player_id = 2
+            player_moves = int(len(moves) / 2)
+
+        set_field(col=int(moves[i]), player_id=player_id, game_field=game_field)
+
+    result["player_id"] = 2
+
+    for col in range(COLS_NUM):
+        for row in range(3):
+            if np.count_nonzero(game_field[row:row + 4, col] == 2) == 4:
+                score += 100
+            if np.count_nonzero(game_field[row:row + 4, col] == 2) == 3 and np.count_nonzero(
+                    game_field[row:row + 4, col] == 0) == 1:
+                score += 7
+            if np.count_nonzero(game_field[row:row + 4, col] == 2) == 2 and np.count_nonzero(
+                    game_field[row:row + 4, col] == 0) == 2:
+                score += 2
+            if np.count_nonzero(game_field[row:row + 4, col] == 1) == 3 and np.count_nonzero(
+                    game_field[row:row + 4, col] == 0) == 1:
+                score += -50
+
+    for row in range(ROWS_NUM):
+        for col in range(4):
+            if np.count_nonzero(game_field[row, col:col + 4] == 2) == 4:
+                score += 100
+            if np.count_nonzero(game_field[row, col:col + 4] == 2) == 3 and np.count_nonzero(
+                    game_field[row, col:col + 4] == 0) == 1:
+                score += 7
+            if np.count_nonzero(game_field[row, col:col + 4] == 2) == 2 and np.count_nonzero(
+                    game_field[row, col:col + 4] == 0) == 2:
+                score += 2
+            if np.count_nonzero(game_field[row, col:col + 4] == 1) == 3 and np.count_nonzero(
+                    game_field[row, col:col + 4] == 0) == 1:
+                score += -50
+
+    for i in range(3):
+        for j in range(4):
+            diagonal_cols = [j, j + 1, j + 2, j + 3]
+            diagonal_rows = [5 - i, 4 - i, 3 - i, 2 - i]
+            diagonal = np.array(
+                [game_field[5 - i, j], game_field[4 - i, j + 1], game_field[3 - i, j + 2], game_field[2 - i, j + 3]])
+            if np.count_nonzero(diagonal == 2) == 4:
+                score += 100
+            if np.count_nonzero(diagonal == 2) == 3 and np.count_nonzero(diagonal == 0) == 1:
+                diagonal_null_col_index = np.argwhere(diagonal == 0)[0][0]
+                available_row = get_available_row(col=diagonal_cols[diagonal_null_col_index], game_field=game_field)
+                проверить в diagonal_rows[diagonal_null_col_index]
+                score += 7
+
+    for i in range(3):
+        for j in range(4):
+            diagonal = np.array(
+                [game_field[i, j], game_field[i + 1, j + 1], game_field[i + 2, j + 2], game_field[i + 3, j + 3]])
+            if np.count_nonzero(diagonal == player_id) == 4:
+                score += 22
+            if np.count_nonzero(diagonal == player_id) == 3:
+                score += 2
+            if np.count_nonzero(diagonal == player_id) == 2:
+                score += 1
+
+        if score >= 22:
+            result["terminal_node"] = True
+
+        score = score - player_moves
+        if player_id == 1:
+            result["score"] = -score
+        else:
+            result["score"] = score
+
+        return result
+
+
+def get_optimal_move(current_move):
+    all_scores = []
+    all_moves = []
+    for i in range(COLS_NUM):
+        result = check_win(current_move + str(i))
+        all_scores.append(result["score"])
+        all_moves.append(current_move + str(i))
+
+    return all_scores, all_moves
+
+
+# print(get_optimal_move(current_move='12131'))
+print(check_win(moves='0112232'))
+
+...
 
 # player_move = input("Выберите столбец:")
 # all_moves.append(player_move)
 
-column, move = get_optimal_move(current_moves=['121'])
-
-...
+# column, move = get_optimal_move(current_moves=['121'])
+# column, move = get_optimal_move(current_moves=[move + str('1')])
