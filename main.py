@@ -152,22 +152,16 @@ def check_move_availability(moves_values, game_field):
     null_fields = np.argwhere(moves_values == 0)
 
 
-def check_win(moves):
+def get_score(moves):
     score = 0
-    result = {"terminal_node": False, "score": None, "player_id": None}
     game_field = np.zeros((ROWS_NUM, COLS_NUM))
 
     for i in range(len(moves)):
         if i % 2 == 0:
             player_id = 1
-            player_moves = int(len(moves) / 2) + 1
         else:
             player_id = 2
-            player_moves = int(len(moves) / 2)
-
         set_field(col=int(moves[i]), player_id=player_id, game_field=game_field)
-
-    result["player_id"] = 2
 
     for col in range(COLS_NUM):
         for row in range(3):
@@ -175,13 +169,13 @@ def check_win(moves):
                 score += 100
             if np.count_nonzero(game_field[row:row + 4, col] == 2) == 3 and np.count_nonzero(
                     game_field[row:row + 4, col] == 0) == 1:
-                score += 7
+                score += 5
             if np.count_nonzero(game_field[row:row + 4, col] == 2) == 2 and np.count_nonzero(
                     game_field[row:row + 4, col] == 0) == 2:
                 score += 2
             if np.count_nonzero(game_field[row:row + 4, col] == 1) == 3 and np.count_nonzero(
                     game_field[row:row + 4, col] == 0) == 1:
-                score += -50
+                score += -70
 
     for row in range(ROWS_NUM):
         for col in range(4):
@@ -189,13 +183,13 @@ def check_win(moves):
                 score += 100
             if np.count_nonzero(game_field[row, col:col + 4] == 2) == 3 and np.count_nonzero(
                     game_field[row, col:col + 4] == 0) == 1:
-                score += 7
+                score += 5
             if np.count_nonzero(game_field[row, col:col + 4] == 2) == 2 and np.count_nonzero(
                     game_field[row, col:col + 4] == 0) == 2:
                 score += 2
             if np.count_nonzero(game_field[row, col:col + 4] == 1) == 3 and np.count_nonzero(
                     game_field[row, col:col + 4] == 0) == 1:
-                score += -50
+                score += -70
 
     for i in range(3):
         for j in range(4):
@@ -207,14 +201,14 @@ def check_win(moves):
             if np.count_nonzero(diagonal == 2) == 4:
                 score += 100
             if np.count_nonzero(diagonal == 2) == 3 and np.count_nonzero(diagonal == 0) == 1:
-                score += 7
+                score += 5
             if np.count_nonzero(diagonal == 2) == 3 and np.count_nonzero(diagonal == 0) == 2:
                 score += 2
             if np.count_nonzero(diagonal == 1) == 3 and np.count_nonzero(diagonal == 0) == 1:
                 diagonal_null_col_index = np.argwhere(diagonal == 0)[0][0]
                 available_row = get_available_row(col=diagonal_cols[diagonal_null_col_index], game_field=game_field)
                 if diagonal_rows[diagonal_null_col_index] == available_row:
-                    score += -50
+                    score += -70
 
     for i in range(3):
         for j in range(4):
@@ -226,40 +220,35 @@ def check_win(moves):
             if np.count_nonzero(diagonal == 2) == 4:
                 score += 100
             if np.count_nonzero(diagonal == 2) == 3 and np.count_nonzero(diagonal == 0) == 1:
-                score += 7
+                score += 5
             if np.count_nonzero(diagonal == 2) == 2 and np.count_nonzero(diagonal == 0) == 2:
                 score += 2
             if np.count_nonzero(diagonal == 1) == 3 and np.count_nonzero(diagonal == 0) == 1:
                 diagonal_null_col_index = np.argwhere(diagonal == 0)[0][0]
                 available_row = get_available_row(col=diagonal_cols[diagonal_null_col_index], game_field=game_field)
                 if diagonal_rows[diagonal_null_col_index] == available_row:
-                    score += -50
+                    score += -70
 
-    if score >= 100:
-        result["terminal_node"] = True
-
-    score = score - player_moves
-    if player_id == 1:
-        result["score"] = -score
-    else:
-        result["score"] = score
-
-    return result
+    return score
 
 
-def get_optimal_move(current_move):
-    all_scores = []
-    all_moves = []
+def get_optimal_move(moves_seq):
+    scores = []
+    moves = []
     for i in range(COLS_NUM):
-        result = check_win(current_move + str(i))
-        all_scores.append(result["score"])
-        all_moves.append(current_move + str(i))
+        score = check_win(moves_seq + str(i))
+        scores.append(score)
+        moves.append(moves_seq + str(i))
 
-    return all_scores, all_moves
+    max_score = np.amax(scores)
+
+    optimal_move = moves[np.where(scores == max_score)[0][0]][-1]
+
+    return optimal_move
 
 
-#print(check_win(moves='00010215162'))
-print(check_win(moves='0112232'))
+optimal_move = get_optimal_move(moves_seq='01122625333')
+
 
 ...
 
